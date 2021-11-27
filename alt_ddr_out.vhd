@@ -7,25 +7,27 @@ LIBRARY altera_mf;
 USE altera_mf.altera_mf_components.all;
 
 ENTITY alt_ddr_out IS
+GENERIC (
+    DATA_WIDTH : positive range 1 to  256
+);
 	PORT
 	(
 		aclr		: IN STD_LOGIC ;
-		datain_h		: IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-		datain_l		: IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		datain_h		: IN STD_LOGIC_VECTOR (DATA_WIDTH-1 DOWNTO 0);
+		datain_l		: IN STD_LOGIC_VECTOR (DATA_WIDTH-1 DOWNTO 0);
 		oe		: IN STD_LOGIC ;
 		outclock		: IN STD_LOGIC ;
 		outclocken		: IN STD_LOGIC ;
-		dataout		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
+		dataout		: OUT STD_LOGIC_VECTOR (DATA_WIDTH-1 DOWNTO 0)
 	);
 END alt_ddr_out;
 
-
 ARCHITECTURE SYN OF alt_ddr_out IS
 
-	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (3 DOWNTO 0);
+	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (DATA_WIDTH-1 DOWNTO 0);
 
 BEGIN
-	dataout    <= sub_wire0(3 DOWNTO 0);
+	dataout    <= sub_wire0(DATA_WIDTH-1 DOWNTO 0);
 
 	ALTDDIO_OUT_component : ALTDDIO_OUT
 	GENERIC MAP (
