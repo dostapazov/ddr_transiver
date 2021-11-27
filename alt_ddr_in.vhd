@@ -8,7 +8,7 @@ USE altera_mf.altera_mf_components.all;
 ENTITY alt_ddr_in IS
 GENERIC 
 (
-    DATA_WIDTH : positive range 0 to 256;
+    DATA_WIDTH : positive range 1 to 256;
     DEVICE_FAMILY : string :="Cyclone V"
 );
 	PORT

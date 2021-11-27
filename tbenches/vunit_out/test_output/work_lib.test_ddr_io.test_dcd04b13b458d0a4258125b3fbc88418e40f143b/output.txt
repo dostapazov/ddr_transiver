@@ -1,0 +1,6 @@
+# vsim -modelsimini /home/dostapazov/projects/ddr_transmitter/tbenches/vunit_out/modelsim/modelsim.ini -wlf /home/dostapazov/projects/ddr_transmitter/tbenches/vunit_out/test_output/work_lib.test_ddr_io.test_dcd04b13b458d0a4258125b3fbc88418e40f143b/modelsim/vsim.wlf -quiet -t ps -onfinish stop work_lib.test_ddr_io(rtl) -L vunit_lib -L work_lib -g/test_ddr_io/runner_cfg="active python runner : true,enabled_test_cases : test,output path : /home/dostapazov/projects/ddr_transmitter/tbenches/vunit_out/test_output/work_lib.test_ddr_io.test_dcd04b13b458d0a4258125b3fbc88418e40f143b/,tb path : /home/dostapazov/projects/ddr_transmitter/tbenches/,use_color : true" 
+# Start time: 18:46:21 on Nov 27,2021
+# ** Warning: Design size of 21615 statements exceeds ModelSim-Intel FPGA Starter Edition recommended capacity.
+# Expect performance to be adversely affected.
+# Break in Subprogram stop at /home/dostapazov/.local/lib/python3.9/site-packages/vunit/vhdl/core/src/stop_body_2008p.vhd line 13
+# Stopped at /home/dostapazov/.local/lib/python3.9/site-packages/vunit/vhdl/core/src/stop_body_2008p.vhd line 13
