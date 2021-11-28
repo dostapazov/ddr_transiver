@@ -14,15 +14,13 @@ entity tb_shift_reg_in is
   use work.shift_reg;
 end entity;
 
-
-
 architecture rtl of tb_shift_reg_in is
 
     constant OUT_WIDTH  : positive := IN_WIDTH * 8;
     constant CLOCK_PERIOD : time := 20 ps;
     signal test_active : boolean := true;
 
-    signal i_clk, i_rst,i_en, o_rdy : std_logic;
+    signal i_clk, i_rst,i_en, o_rdy, o_busy : std_logic;
        
     signal i_data  : std_logic_vector(IN_WIDTH-1 downto 0);
     signal o_data  : std_logic_vector(OUT_WIDTH-1 downto 0);
@@ -43,7 +41,6 @@ begin
   generic map (
     DIN_WITDH  => IN_WIDTH,
     DOUT_WIDTH => OUT_WIDTH
-    
   )
   port map(
       i_rst     => i_rst  , 
@@ -51,7 +48,8 @@ begin
       i_en      => i_en   ,
       i_data    => i_data ,
       o_data    => o_data ,
-      o_rdy     => o_rdy  
+      o_rdy     => o_rdy  ,
+      o_busy    => o_busy
   );
 
   main: process
@@ -68,7 +66,6 @@ begin
         wait until rising_edge(i_clk);
     end procedure;
 
-    
     procedure start_shift(constant value : std_logic_vector(i_data'range) ) is
     begin
       i_data <= value;

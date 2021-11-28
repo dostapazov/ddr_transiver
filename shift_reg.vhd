@@ -2,6 +2,10 @@ library ieee;
   use ieee.std_logic_1164.all;
   use ieee.numeric_std.all;
 
+  library vunit_lib;
+    context vunit_lib.vunit_context;  
+
+
 entity shift_reg is
   generic (
     DIN_WITDH  : positive := 1;
