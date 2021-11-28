@@ -2,9 +2,13 @@ library ieee;
   use ieee.std_logic_1164.all;
   use ieee.numeric_std.all;
 
+library vunit_lib;
+    context vunit_lib.vunit_context;  
+
+
 entity tb_ddr_transmitter is
   generic (
-    runner_cfg : string;
+    runner_cfg   : string;
     SYMBOL_WIDTH : positive :=32;
     LINES        : positive := 4;
     PRE_CLOCK    : positive range 2 to 16 := 4;
@@ -55,10 +59,40 @@ begin
             i_mode   => i_mode  , 
             i_tx_clk => i_tx_clk, 
             o_tx_clk => o_tx_clk, 
-            o_lines  => o_lines  
+            o_lines  => o_lines ,
+            o_busy   => open 
         );
 
+  main : process
+
+    procedure reset is
+    begin
+        i_rst <= '0';
+        i_valid <= '0';
+        i_mode  <= '0';
+
+        i_data <= (others => 'Z');  
+        wait until rising_edge(i_sys_clk);
+        i_rst <= '1';
+        wait until rising_edge(i_sys_clk);
+        i_rst <= '0';
+        wait until rising_edge(i_sys_clk);
+    end procedure;
+
+  begin
+        test_runner_setup(runner, runner_cfg);
+        while(test_suite) loop
+            if run("reset") then  
+            reset;
+            end if;
+        end loop;
+        wait for 3 * TX_CLK_PERIOD;
+        test_active <= false;
+        test_runner_cleanup(runner);
+        wait;
+    end process;    
+
   sys_clk : gen_clk(i_sys_clk,SYS_CLK_PERIOD/2);      
-  tx_clk  : gen_clk(i_tx_clk,TX_CLK_PERIOD/2,TX_CLK_PERIOD/3);
+  tx_clk  : gen_clk(i_tx_clk,TX_CLK_PERIOD/2,7 ps);
 
 end architecture;

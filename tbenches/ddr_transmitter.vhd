@@ -10,20 +10,20 @@ entity ddr_transmitter is
     POST_CLOCK      : positive range 2 to 16 := 4
   );
   port (
-      i_rst     : std_logic;
+      i_rst     : in  std_logic;
 
-      i_sys_clk     : std_logic;
-      i_data    : std_logic_vector(LINES*SYMBOL_WIDTH-1 downto 0);
-      i_valid   : std_logic;
-      o_ack     : std_logic;
+      i_sys_clk : in  std_logic;
+      i_data    : in  std_logic_vector(LINES*SYMBOL_WIDTH-1 downto 0);
+      i_valid   : in  std_logic;
+      o_ack     : out std_logic;
 
-      i_mode    : std_logic; -- 0 - tx
-      i_tx_clk  : std_logic;
-      o_tx_clk  : std_logic;
-      o_lines   : std_logic_vector(LINES-1 downto 0);
+      i_mode    : in  std_logic; -- 0 - tx mode
+      i_tx_clk  : in  std_logic;
+      o_tx_clk  : out std_logic;
+      o_lines   : out std_logic_vector(LINES-1 downto 0);
 
 --  diag signals
-      o_busy    : std_logic
+      o_busy    : out std_logic
   );
 
     use work.alt_ddr_out;  
@@ -32,15 +32,21 @@ end entity;
 
 architecture rtl of ddr_transmitter is
 
-    signal s_tx_reset : std_logic;
-    signal s_sh_en   : std_logic;
-    signal s_sh_rdy  : std_logic;
-    signal s_sh_data : std_logic_vector(2*LINES-1 downto 0);
-    signal s_sh_busy : std_logic;
+    signal s_sh_en      : std_logic;
+    signal s_sh_rdy     : std_logic;
+    signal s_sh_data    : std_logic_vector(2*LINES-1 downto 0);
+    signal s_sh_busy    : std_logic;
+    signal s_out_clk_en : std_logic;
+
+    type TX_STATES  is (TX_IDLE,TX_START, TX_PROCESS, TX_END);
+    signal tx_curr_state : TX_STATES := TX_IDLE;
     
 begin
 
-       
+       o_busy     <= s_sh_busy;
+       o_tx_clk   <= i_tx_clk and s_out_clk_en;
+          
+
        ddr_out : entity work.alt_ddr_out
        generic map
        (
@@ -48,7 +54,7 @@ begin
        )
        port map
        (
-        aclr		=>  s_tx_reset,
+        aclr		=>  i_rst,
         datain_h	=>  s_sh_data(s_sh_data'high  downto LINES),
         datain_l	=>  s_sh_data(LINES-1  downto  0),
         oe			=>  not i_mode,
@@ -61,11 +67,11 @@ begin
        generic map
        (
         DIN_WITDH => i_data'length,
-        DOUT_WIDTH => LINES
+        DOUT_WIDTH => s_sh_data'length
        )
        port map
        (
-        i_rst     => s_tx_reset,
+        i_rst     => i_rst,
         i_clk     => i_tx_clk,
         i_en      => s_sh_en,
         i_data    => i_data,
@@ -73,4 +79,28 @@ begin
         o_rdy     => s_sh_rdy,
         o_busy    => s_sh_busy
        ); 
+
+        s_out_clk_en <= '0' when tx_curr_state = TX_IDLE else '1';
+
+       tx : process (i_rst, i_tx_clk)
+       begin
+         if(i_rst = '1') then
+            tx_curr_state <= TX_IDLE;
+        elsif rising_edge(i_tx_clk) then
+                case tx_curr_state is
+                  when TX_IDLE =>
+                       if(i_valid = '1')  then
+                          tx_curr_state <= TX_START;
+                       end if;
+                  when TX_START =>
+                        tx_curr_state <= TX_PROCESS;
+                  when TX_PROCESS =>
+                        tx_curr_state <= TX_END;
+                  when TX_END =>
+                        tx_curr_state <= TX_IDLE;
+                  when others => 
+                    tx_curr_state <= TX_IDLE;
+                end case;
+         end if;
+       end process;
 end architecture;
