@@ -23,7 +23,7 @@ architecture rtl of tb_shift_reg_out is
     constant CLOCK_PERIOD : time := 20 ps;
     signal test_active : boolean := true;
 
-    signal i_clk, i_rst,i_en, o_rdy : std_logic;
+    signal i_clk, i_rst,i_en, o_rdy , o_busy: std_logic;
        
     signal i_data  : std_logic_vector(IN_WIDTH-1 downto 0);
     signal o_data  : std_logic_vector(OUT_WIDTH-1 downto 0);
@@ -51,7 +51,8 @@ begin
       i_en      => i_en   ,
       i_data    => i_data ,
       o_data    => o_data ,
-      o_rdy     => o_rdy  
+      o_rdy     => o_rdy  ,
+      o_busy    => o_busy
   );
 
   main: process
@@ -67,18 +68,6 @@ begin
         i_rst <= '0';
         wait until rising_edge(i_clk);
     end procedure;
-
-    -- procedure enable_shifr(constant value : std_logic_vector(i_data'range)) is
-    -- begin
-    --   i_data <= value;
-    --   wait until falling_edge(i_clk);
-    --   i_en <= '1';
-    -- end procedure;
-
-    -- procedure enable_shift(constant value : integer) is
-    -- begin
-    --   enable_shift(conv_std_logic_vector(value, i_data'length));
-    -- end procedure;
 
     procedure start_shift(constant value : std_logic_vector(i_data'range) ) is
     begin
@@ -99,12 +88,25 @@ begin
             if run("reset should set up o_rdy to 1") then
               reset;
               check(o_rdy = '1',"Expected o_rdy");
-            elsif run("enable should confirm by drop down rdy to zero") then
+            elsif run("test shift work") then
               reset;
-              
-              wait until falling_edge(o_rdy) for 100*CLOCK_PERIOD;
+              start_shift(16#12345678#);
+              for i in 0 to 7 loop
+                wait until falling_edge(o_rdy) for 100*CLOCK_PERIOD;
+                wait for 1 ps;
+                check(o_rdy = '0',"Expected than rdy is drop down to confirm  data latched");
+                wait until rising_edge(i_clk) ;
+                wait for 1 ps;
+                check(o_rdy = '1',"Expected than rdy is drop down to confirm  data latched");
+              end loop;
+
+              wait until rising_edge (i_clk);
+              i_en <= '0';
+              wait until falling_edge(o_busy) for 100*CLOCK_PERIOD;
               wait for 1 ps;
-              check(o_rdy = '0',"Expected than rdy is drop down to confirm  data latched");
+              check(o_busy = '0',"Expected than o_busy is drop down ");
+              
+              
             end if;
         end loop;
         wait for 3*CLOCK_PERIOD;
