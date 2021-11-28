@@ -79,7 +79,30 @@ begin
 
   else generate
     -- section shift from 
-    s_rdy <= '1';
+    s_rdy <= '0' when curr_state = VALID else '1';
+    s_odata <= s_idata(s_idata'high downto s_odata'length);
+    sh : process(i_rst , i_clk)
+    begin
+      if(i_rst = '1') then
+        curr_state <= IDLE;
+      elsif rising_edge(i_clk) then
+        case curr_state is
+          when IDLE | VALID=>
+               if(i_en = '1')  then
+                curr_state <= SHIFT;
+                s_idata <= i_data;
+               else
+                 curr_state <=IDLE;
+               end if;
+          when SHIFT =>
+          when others =>
+          curr_state <= IDLE;
+          
+        end case;
+      end if;
+    end process;
+
+
   end generate;
   
 end architecture;

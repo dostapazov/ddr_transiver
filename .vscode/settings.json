@@ -1,4 +1,4 @@
 {
-    "vunit.runpy": "tbenches/run.py",
+    "vunit.runpy": "tbenches/run_test.py",
     "vunit.findRunPy": false
 }
