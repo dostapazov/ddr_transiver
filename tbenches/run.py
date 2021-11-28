@@ -12,7 +12,6 @@ def create_test_suite(lib):
     lib.add_source_files("../*.vhd")
     lib.add_source_files("*.vhd")
 
-
     os.chdir(save_dir)
 
 
